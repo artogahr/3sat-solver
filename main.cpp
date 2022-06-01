@@ -1,11 +1,11 @@
 #include <iostream>
-#include <stdio.h>
-#include <pthread.h>
+#include "stdio.h"
 #include <fstream>
 #include <stdlib.h>
 #include <filesystem>
+#include <chrono>
+#include <thread>
 
-void checkLinesForSAT(bool *variables_array, int line_states[][3], int line_count, int variable_count);
 void iterateArray(bool* array, int array_size);
 void printArray(bool* array, int array_size);
 void printIntArray(int *array, int array_size);
@@ -14,7 +14,6 @@ using namespace std;
 int main()
 {
 	string line;
-	pthread_t ptid;
 	bool SAT;
 	ifstream current_file;
 	std::string problems_path = "problems-easy/";
@@ -82,68 +81,63 @@ int main()
 			//printArray(variables_array, variable_count+1);
 			/* cout << "--------------------------------------------" << endl; */
 			/* cout <<  "Now we try the current array state with our variable states" << endl; */
+			int currentNum;
+			int index;
+			for (int i=0; i<line_count; i++)
+			{
+//				cout << "Trying line "; 
+//				for(int j=0; j<3; j++)
+//					cout << line_states[i][j] << " ";
+//				cout << endl;
+				SAT = 0;
+				for(int j=0; j<3; j++)
+				{
+					/* index = i; */
+					currentNum = line_states[i][j];
+					if (currentNum == 0)
+						break;
+					else if (currentNum > 0 && variables_array[currentNum] == 1)
+					{
+//						cout << "sat: " << currentNum << " " << variables_array[currentNum] << endl;
+						SAT = 1;
+						break;
+					}
+					else if (currentNum < 0 && variables_array[-currentNum] == 0)
+					{
+//						cout << "sat: " << currentNum << " " << variables_array[-currentNum] << endl;
+						SAT = 1;
+						break;
+					}
+					/* else */
+					/* { */
+					/* 	cout << "UNSAT: CurrentNum: " << currentNum << " compared to: " << variables_array[abs(currentNum)] << endl; */
+					/* } */
+				}	
+				/* cout << endl; */
+				//cout << "--" << endl;
+				if (SAT == 0){
+//				cout << "BROKE SAT WITH LINE STATES: " ;
+//					for (int t=0; t<3; t++)
+//						cout << line_states[index][t] << " ";
+//					cout << endl;
+					break;
+				}
+			}
+			if (SAT == 1){
+				/* cout << endl; */
+//				cout << "YESSAT" << endl;
+				printArray(variables_array, variable_count+1);
+				iterateArray(variables_array, variable_count + 1);
+			}
 			/* else */ 
-			checkLinesForSAT(variables_array, line_states, line_count, variable_count);
 			/* 	cout << "UNSAT" << endl; */
 			/* printArray(variables_array, variable_count+1); */
 			/* printIntArray(variable_states, variable_count); */ 
 			/* iterateArray(variables_array, variable_count+1); */
+			else
 				iterateArray(variables_array, variable_count + 1);
 		}
 		current_file.close();
-	}
-}
-
-void checkLinesForSAT(bool *variables_array, int line_states[][3], int line_count, int variable_count)
-{
-	int currentNum, index, SAT;
-	volatile bool flag=false;
-//#pragma omp parallel for collapse(2) shared (flag) private (SAT) 
-	for (int i=0; i<line_count; i++)
-	{
-		if(flag) continue;
-		/* cout << "Trying line "; */ 
-		/* for(int j=0; j<3; j++) */
-		/* 	cout << line_states[i][j] << " "; */
-		/* cout << endl; */
-		SAT = 0;
-		for(int j=0; j<3; j++)
-		{
-			/* index = i; */
-			currentNum = line_states[i][j];
-			if (currentNum == 0)
-				break;
-			else if (currentNum > 0 && variables_array[currentNum] == 1)
-			{
-				/* cout << "sat: " << currentNum << " " << variables_array[currentNum] << endl; */
-				SAT = 1;
-				break;
-			}
-			else if (currentNum < 0 && variables_array[-currentNum] == 0)
-			{
-				/* cout << "sat: " << currentNum << " " << variables_array[-currentNum] << endl; */
-				SAT = 1;
-				break;
-			}
-			/* else */
-			/* { */
-			/* 	cout << "UNSAT: CurrentNum: " << currentNum << " compared to: " << variables_array[abs(currentNum)] << endl; */
-			/* } */
-		}	
-		/* cout << endl; */
-		//cout << "--" << endl;
-		if (SAT == 0){
-			//				cout << "BROKE SAT WITH LINE STATES: " ;
-			//					for (int t=0; t<3; t++)
-			//						cout << line_states[index][t] << " ";
-			//					cout << endl;
-			flag=true;
-		}
-	}
-	if (SAT == 1){
-		/* cout << endl; */
-		//				cout << "YESSAT" << endl;
-		printArray(variables_array, variable_count+1);
 	}
 }
 void printIntArray(int *array, int array_size)
