@@ -3,8 +3,6 @@
 #include <fstream>
 #include <stdlib.h>
 #include <filesystem>
-#include <chrono>
-#include <thread>
 
 void iterateArray(bool* array, int array_size);
 void printArray(bool* array, int array_size);
@@ -31,6 +29,7 @@ int main()
 			stringstream ss(line);
 			string word;
 			ss >> word;
+			cout << word;
 			if(word == "c")
 				continue;
 			else if (word == "p")
@@ -53,20 +52,19 @@ int main()
 
 		while(variables_array[0] != 1)
 		{
-//			cout << "==========================" << endl;
-//			cout << "Trying ";
+			/* cout << "==========================" << endl; */
+			/* cout << "Trying "; */
 			//printArray(variables_array, variable_count+1);
-			 /* std::this_thread::sleep_for(1s); */
 			current_file.seekg(current_position, current_file.beg);
 			for (int j=0; j<line_count; j++)
 			{
 				getline(current_file, line);
 				/* cout << "read line: " << line << endl; */
-				stringstream ss(line);
+				stringstream ss1(line);
 				int input;
 				for(int k=0; k<3; k++)
 				{
-					ss >> input;
+					ss1 >> input;
 					if (input == 0)
 						break;
 					else
@@ -85,47 +83,45 @@ int main()
 			int index;
 			for (int i=0; i<line_count; i++)
 			{
-//				cout << "Trying line "; 
-//				for(int j=0; j<3; j++)
-//					cout << line_states[i][j] << " ";
-//				cout << endl;
-				SAT = 0;
+				cout << "Trying line "; 
+				for(int j=0; j<3; j++)
+					cout << line_states[i][j] << " ";
+				cout << endl;
+				cout << " With variables";
+				printArray(variables_array, variable_count+1);
+				SAT = 1;
 				for(int j=0; j<3; j++)
 				{
-					/* index = i; */
+					index = i;
 					currentNum = line_states[i][j];
 					if (currentNum == 0)
 						break;
-					else if (currentNum > 0 && variables_array[currentNum] == 1)
+					else if (currentNum > 0 && variables_array[currentNum] != 1)
 					{
-//						cout << "sat: " << currentNum << " " << variables_array[currentNum] << endl;
-						SAT = 1;
+						cout << "broke sat: " << currentNum << " " << variables_array[currentNum] << endl;
+						SAT = 0;
 						break;
 					}
-					else if (currentNum < 0 && variables_array[-currentNum] == 0)
+					else if (currentNum < 0 && variables_array[-currentNum] != 0)
 					{
-//						cout << "sat: " << currentNum << " " << variables_array[-currentNum] << endl;
-						SAT = 1;
+						cout << "broke sat: " << currentNum << " " << variables_array[-currentNum] << endl;
+						SAT = 0;
 						break;
 					}
-					/* else */
-					/* { */
-					/* 	cout << "UNSAT: CurrentNum: " << currentNum << " compared to: " << variables_array[abs(currentNum)] << endl; */
-					/* } */
 				}	
 				/* cout << endl; */
 				//cout << "--" << endl;
-				if (SAT == 0){
-//				cout << "BROKE SAT WITH LINE STATES: " ;
-//					for (int t=0; t<3; t++)
-//						cout << line_states[index][t] << " ";
-//					cout << endl;
+				if (SAT == 1){
+				/* cout << "YESSAT" << endl; */
+				/* 	for (int t=0; t<3; t++) */
+				/* 		cout << line_states[index][t] << " "; */
 					break;
 				}
 			}
 			if (SAT == 1){
-				/* cout << endl; */
-//				cout << "YESSAT" << endl;
+				cout << endl;
+				cout << "YESSAT" << endl;
+
 				printArray(variables_array, variable_count+1);
 				iterateArray(variables_array, variable_count + 1);
 			}
@@ -153,7 +149,7 @@ void printIntArray(int *array, int array_size)
 void printArray(bool *array, int array_size)
 {
 	cout << "Variables array state: ";
-	for (int i=1; i<array_size; i++)
+	for (int i=0; i<array_size; i++)
 	{
 		cout << array[i];
 	}
